@@ -2,6 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import avatarImage from '../assets/images/avatar.png';
 import Logo from './Logo';
+import Button from './Button';
+import { useNavigate } from 'react-router-dom';
 
 const DropdownMenu = styled.div`
   position: absolute;
@@ -36,7 +38,7 @@ const MenuItem = styled.button`
   }
 `;
 
-const Nav = styled.nav`
+const Nav = styled.div`
   background: var(--white);
   padding: 12px 32px;
   display: flex;
@@ -45,6 +47,29 @@ const Nav = styled.nav`
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border);
+`;
+
+const NavLinks = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 32px;
+
+  a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+
+    &:hover {
+      color: var(--primary-main);
+    }
+  }
+`;
+
+const NavButtons = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 16px;
 `;
 
 const AccountMenu = styled.div`
@@ -59,30 +84,61 @@ const AccountMenu = styled.div`
   }
 `;
 
-const TopNav = ({ simplified = false }) => {
+const TopNav = ({ variant = 'app' }) => {
   const [isOpen, setIsOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   return (
     <Nav>
       <Logo />
-      <AccountMenu onClick={() => setIsOpen(!isOpen)}>
-        <span className="material-icons">account_circle</span>
-        <span className="material-icons">{isOpen ? 'expand_less' : 'expand_more'}</span>
-        {isOpen && (
-          <DropdownMenu>
-            {!simplified && (
-              <MenuItem>
-                <span className="material-icons">settings</span>
-                Settings
-              </MenuItem>
-            )}
-            <MenuItem>
-              <span className="material-icons">logout</span>
-              Logout
-            </MenuItem>
-          </DropdownMenu>
-        )}
-      </AccountMenu>
+      {variant === 'marketing' ? (
+        <>
+          <NavLinks>
+            <a href="#">For Candidates</a>
+            <a href="#">For Voters</a>
+            <a href="#">Resources</a>
+            <a href="#">Our Mission</a>
+          </NavLinks>
+          <NavButtons>
+            <Button variant="clear" onClick={() => navigate('/signup')}>
+              Sign up
+            </Button>
+            <Button variant="clear" onClick={() => navigate('/#')}>
+              Log in
+            </Button>
+            <Button variant="secondary" onClick={() => navigate('/#')}>
+              Get Campaign Tools
+            </Button>
+          </NavButtons>
+        </>
+      ) : (
+        <AccountMenu onClick={() => setIsOpen(!isOpen)}>
+          <span className="material-icons">account_circle</span>
+          <span className="material-icons">{isOpen ? 'expand_less' : 'expand_more'}</span>
+          {isOpen && (
+            <DropdownMenu>
+              {variant === 'app' && (
+                <>
+                  <MenuItem>
+                    <span className="material-icons">settings</span>
+                    Settings
+                  </MenuItem>
+                  <MenuItem>
+                    <span className="material-icons">logout</span>
+                    Logout
+                  </MenuItem>
+                </>
+              )}
+              {variant === 'signup' && (
+                <MenuItem>
+                  <span className="material-icons">logout</span>
+                  Logout
+                </MenuItem>
+              )}
+            </DropdownMenu>
+          )}
+        </AccountMenu>
+      )}
     </Nav>
   );
 };

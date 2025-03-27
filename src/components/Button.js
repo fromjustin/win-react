@@ -13,6 +13,9 @@ const ButtonStyles = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
+  text-align: center;
+  width: ${props => props.fullWidth ? '100%' : 'auto'};
+  justify-content: ${props => props.fullWidth ? 'center' : 'flex-start'};
 
   ${props => {
     switch (props.variant) {
@@ -51,6 +54,21 @@ const ButtonStyles = styled.button`
             background: #E5E9EC;
           }
         `;
+      case 'clear':
+        return css`
+          background: transparent;
+          border: none;
+          color: var(--text-primary);
+          padding: 0;
+  
+          &:hover {
+            color: var(--primary-main);
+          }
+  
+          &:disabled {
+            color: var(--text-disabled);
+          }
+        `;
     }
   }}
 
@@ -62,9 +80,9 @@ const ButtonStyles = styled.button`
   }
 `;
 
-const Button = ({ children, variant = 'primary', size = 'regular', ...props }) => {
+const Button = ({ children, variant = 'primary', size = 'regular', fullWidth = false, ...props }) => {
   return (
-    <ButtonStyles variant={variant} size={size} {...props}>
+    <ButtonStyles variant={variant} size={size} fullWidth={fullWidth} {...props}>
       {children}
     </ButtonStyles>
   );
