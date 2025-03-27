@@ -32,6 +32,7 @@ const SignupContainer = styled.div`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin-bottom: 128px;
 `;
 
 const SignupContent = styled.div`
