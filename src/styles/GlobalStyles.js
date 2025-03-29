@@ -16,6 +16,9 @@ const GlobalStyles = createGlobalStyle`
     --success-disabled: rgba(24, 118, 55, 0.5);
     --neutral-dark: #1E1F20;
     --neutral-main: #D1D8DF;
+    --info-main: #1B6AFC;
+    --info-light: #94B3EE;
+    
   }
 
   body {

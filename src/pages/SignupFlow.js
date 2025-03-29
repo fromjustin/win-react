@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import Button from '../components/Button';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TopNav from '../components/TopNav';
@@ -8,6 +8,17 @@ import StepIndicator from '../components/StepIndicator';
 import Select from '../components/Select';
 import RadioButton from '../components/RadioButton';
 import CalculationAnimation from '../components/CalculationAnimation';
+
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 const HeaderContent = styled.div`
   display: flex;
@@ -56,12 +67,6 @@ const StepContent = styled.div`
     margin: 0 0 8px;
     color: var(--text-primary);
   }
-
-  p {
-    font-size: 16px;
-    color: var(--gray);
-    margin: 0 0 32px;
-  }
 `;
 
 const ButtonGroup = styled.div`
@@ -78,6 +83,11 @@ const AffiliationOptions = styled.div`
   margin-bottom: 24px;
 `;
 
+const FormContainer = styled.div`
+  animation: ${fadeIn} 0.5s ease-out;
+  margin-top: 24px;
+`;
+
 const SignupFlow = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [firstName, setFirstName] = useState('');
@@ -89,6 +99,7 @@ const SignupFlow = () => {
   const [officeLevel, setOfficeLevel] = useState('');
   const [affiliation, setAffiliation] = useState('');
   const [initialContacts, setInitialContacts] = useState('');
+  const [showVoteGoalForm, setShowVoteGoalForm] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -280,17 +291,20 @@ const SignupFlow = () => {
 
           {/* Step 3: Vote Goal */}
           <StepContent active={currentStep === 3}>
-            <HeaderContent>
-              <h1>Your Path to Victory</h1>
-              <p>Based on historical data, you need:</p>
-            </HeaderContent>
-            <CalculationAnimation votesNeeded={1547} />
-            <form onSubmit={handleNextStep}>
-              <ButtonGroup>
-                <Button type="button" variant="neutral" onClick={previousStep}>Back</Button>
-                <Button type="submit">Next</Button>
-              </ButtonGroup>
-            </form>
+            <CalculationAnimation 
+              votesNeeded={1547} 
+              onComplete={() => setShowVoteGoalForm(true)} 
+            />
+            {showVoteGoalForm && (
+              <FormContainer>
+                <form onSubmit={handleNextStep}>
+                  <ButtonGroup>
+                    <Button type="button" variant="neutral" onClick={previousStep}>Back</Button>
+                    <Button type="submit">Next</Button>
+                  </ButtonGroup>
+                </form>
+              </FormContainer>
+            )}
           </StepContent>
 
           {/* Step 4: Initial Contacts */}
