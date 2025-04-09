@@ -132,11 +132,39 @@ const TasksList = styled.div`
   gap: 16px;
 `;
 
+const successAnimation = keyframes`
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+`;
+
+const SuccessIcon = styled.span`
+  animation: ${successAnimation} 0.2s ease forwards;
+  margin-right: 4px;
+  vertical-align: middle;
+  display: inline-flex;
+  color: var(--primary-dark);
+  font-size: 24px;
+  height: 24px;
+  width: 24px;
+  align-items: center;
+`;
+
 const DashboardPage = () => {
   const [votersContacted, setVotersContacted] = React.useState(0);
   const [firstName, setFirstName] = React.useState('');
   const [scheduleModalOpen, setScheduleModalOpen] = React.useState(false);
   const [contactsModalOpen, setContactsModalOpen] = React.useState(false);
+  const [materialsModalOpen, setMaterialsModalOpen] = React.useState(false);
   const [newContacts, setNewContacts] = React.useState('');
   const [tasks, setTasks] = React.useState([
     {
@@ -144,29 +172,52 @@ const DashboardPage = () => {
       title: 'Schedule your persuasive text message',
       description: 'Build trust and persuade voters.',
       completed: false,
-      skipContactsModal: true
+      skipContactsModal: true,
+      buttonText: 'Schedule'
     },
     {
       id: 2,
       title: 'Call 25 voters',
       description: 'Connect with voters in your district.',
       completed: false,
-      skipContactsModal: false
+      skipContactsModal: false,
+      buttonText: 'Record calls'
+    },
+    {
+      id: 3,
+      title: 'Post to social media answering common questions',
+      description: 'Mobilize your base and control the narrative about your campaign.',
+      completed: false,
+      skipContactsModal: true,
+      buttonText: 'Write post'
     }
     // Add more tasks here
   ]);
   const userData = JSON.parse(localStorage.getItem('userData') || '{}');
   const votesNeeded = 1547;
   const progress = Math.min((votersContacted / votesNeeded) * 100, 100);
+  const [scriptCopied, setScriptCopied] = React.useState(false);
 
   const toggleTask = (taskId) => {
     const task = tasks.find(t => t.id === taskId);
-    if (!task.completed && !task.skipContactsModal) {
-      setContactsModalOpen(true);
+    if (!task.completed) {
+      if (task.id === 2) { // Call 25 voters task
+        if (!task.skipContactsModal) {
+          setContactsModalOpen(true);
+        }
+      }
     }
     setTasks(tasks.map(task => 
       task.id === taskId ? { ...task, completed: !task.completed } : task
     ));
+  };
+
+  const handleTaskButton = (taskId) => {
+    if (taskId === 3) { // Social media task
+      setMaterialsModalOpen(true);
+    } else {
+      setScheduleModalOpen(true);
+    }
   };
 
   const handleAddContacts = () => {
@@ -174,6 +225,13 @@ const DashboardPage = () => {
     setVotersContacted(prev => prev + contacts);
     setNewContacts('');
     setContactsModalOpen(false);
+  };
+
+  const handleCopyScript = () => {
+    setScriptCopied(true);
+    setTimeout(() => {
+      setScriptCopied(false);
+    }, 2000);
   };
 
   React.useEffect(() => {
@@ -233,7 +291,8 @@ const DashboardPage = () => {
                   key={task.id}
                   task={task}
                   onToggle={toggleTask}
-                  onSchedule={() => setScheduleModalOpen(true)}
+                  onSchedule={() => handleTaskButton(task.id)}
+                  buttonText={task.buttonText}
                 />
               ))}
             </TasksList>
@@ -282,6 +341,30 @@ const DashboardPage = () => {
           />
           <button type="submit" style={{ display: 'none' }} />
         </form>
+      </Modal>
+
+      <Modal
+        isOpen={materialsModalOpen}
+        onClose={() => {
+          setMaterialsModalOpen(false);
+          setScriptCopied(false);
+        }}
+        title="Download your materials"
+        footer={
+          <Button 
+            onClick={handleCopyScript}
+            variant="primary"
+          >
+            {scriptCopied ? (
+              <>
+                <SuccessIcon className="material-icons">check</SuccessIcon>
+                Copied
+              </>
+            ) : 'Copy script'}
+          </Button>
+        }
+      >
+        <p>Your campaign materials will help you reach voters effectively.</p>
       </Modal>
     </AppContainer>
   );

@@ -19,57 +19,45 @@ const checkmarkAnimation = keyframes`
 
 const burstAnimation = keyframes`
   0% {
-    transform: translate(0, 0) scale(2);
+    transform: translate(60%, -60%) scale(0);
     opacity: 0;
   }
   20% {
-    transform: translate(0, 0) scale(1.5);
+    transform: translate(60%, -60%) scale(1);
     opacity: 1;
   }
   40% {
-    transform: translate(var(--tx), var(--ty)) scale(1);
+    transform: translate(calc(60% + var(--tx)), calc(-60% + var(--ty))) scale(1.2);
     opacity: 1;
   }
   100% {
-    transform: translate(var(--tx), var(--ty)) scale(0);
+    transform: translate(calc(60% + var(--tx)), calc(-60% + var(--ty))) scale(0);
     opacity: 0;
-  }
-`;
-
-const containerAnimation = keyframes`
-  0% {
-    transform: translate(0%, 0%);
-  }
-  30% {
-    transform: translate(0%, 0%);
-  }
-  40% {
-    transform: translate(0%, 0%);
-  }
-  60% {
-    transform: translate(0%, 0%);
-  }
-  100% {
-    transform: translate(0%, 0%);
   }
 `;
 
 const Burst = styled.div`
   position: absolute;
-  width: 4px;
-  height: 4px;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  width: 3px;
+  height: 3px;
   border-radius: ${props => props.shape === 'circle' ? '50%' : '0'};
   background: var(--primary-dark);
   
   ${props => props.active && css`
     animation: ${burstAnimation} 0.5s ease-out forwards;
-    --tx: ${props => Math.cos(props.angle) * 20}px;
-    --ty: ${props => Math.sin(props.angle) * 20}px;
+    --tx: ${props => Math.cos(props.angle) * 15}px;
+    --ty: ${props => Math.sin(props.angle) * 15}px;
   `}
 `;
 
 const Star = styled.div`
   position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
   width: 20px;
   height: 20px;
   background: var(--primary-dark);
@@ -87,6 +75,51 @@ const Star = styled.div`
   
   ${props => props.active && css`
     animation: ${starAnimation} .5s ease-out forwards;
+  `}
+`;
+
+const octagonAnimation = keyframes`
+  0% {
+    transform: translate(0%, 0%) scale(.2);
+    opacity: 0;
+  }
+  40% {
+    transform: translate(60%, -60%) scale(1);
+    opacity: 1;
+  }
+  90% {
+    transform: translate(60%, -60%) scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(60%, -60%) scale(0);
+    opacity: 0;
+  }
+`;
+
+const Octagon = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  width: 20px;
+  height: 20px;
+  background: var(--primary-dark);
+  opacity: 0;
+  clip-path: polygon(
+    50% 0%,     /* top point */
+    85% 15%,    /* top-right */
+    100% 50%,   /* right */
+    85% 85%,    /* bottom-right */
+    50% 100%,   /* bottom */
+    15% 85%,    /* bottom-left */
+    0% 50%,     /* left */
+    15% 15%     /* top-left */
+  );
+  
+  ${props => props.active && css`
+    animation: ${octagonAnimation} .5s ease-out forwards;
+    animation-delay: 0.1s;
   `}
 `;
 
@@ -140,18 +173,6 @@ const TaskItemContainer = styled.div`
   }
 `;
 
-const AnimationContainer = styled.div`
-  position: absolute;
-  left: 0%;
-  top: 0%;
-  transform: translate(-100%, -100%);
-  pointer-events: none;
-  
-  ${props => props.active && css`
-    animation: ${containerAnimation} 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  `}
-`;
-
 const starAnimation = keyframes`
   0% {
     transform: translate(0%, 0%) scale(.2);
@@ -171,7 +192,7 @@ const starAnimation = keyframes`
   }
 `;
 
-const TaskItem = ({ task, onToggle, onSchedule }) => {
+const TaskItem = ({ task, onToggle, onSchedule, buttonText = 'Schedule' }) => {
   const [burstActive, setBurstActive] = React.useState(false);
   const [initialBurstActive, setInitialBurstActive] = React.useState(false);
 
@@ -181,8 +202,8 @@ const TaskItem = ({ task, onToggle, onSchedule }) => {
       setTimeout(() => {
         setBurstActive(true);
         setInitialBurstActive(false);
-      }, 601);
-      setTimeout(() => setBurstActive(false), 600);
+      }, 400);
+      setTimeout(() => setBurstActive(false), 900);
     }
     onToggle(task.id);
   };
@@ -207,30 +228,34 @@ const TaskItem = ({ task, onToggle, onSchedule }) => {
           >
             {task.completed ? 'task_alt' : 'circle'}
           </span>
-          <AnimationContainer active={initialBurstActive}>
-            {initialBurstActive && (
+          {initialBurstActive && (
+            <>
               <Star
-                key="single-burst"
+                key="star-burst"
                 active={initialBurstActive}
               />
-            )}
-            {burstActive && (
-              <>
-                {[...Array(8)].map((_, i) => {
-                  const angle = (i * Math.PI * 2) / 8;
-                  return (
-                    <Burst 
-                      key={i} 
-                      index={i} 
-                      angle={angle}
-                      active={burstActive}
-                      shape={i % 2 === 0 ? 'circle' : 'square'}
-                    />
-                  );
-                })}
-              </>
-            )}
-          </AnimationContainer>
+              <Octagon
+                key="octagon-burst"
+                active={initialBurstActive}
+              />
+            </>
+          )}
+          {burstActive && (
+            <>
+              {[...Array(8)].map((_, i) => {
+                const angle = (i * Math.PI * 2) / 8;
+                return (
+                  <Burst 
+                    key={i} 
+                    index={i} 
+                    angle={angle}
+                    active={burstActive}
+                    shape={i % 2 === 0 ? 'circle' : 'square'}
+                  />
+                );
+              })}
+            </>
+          )}
         </CheckboxContainer>
         <div className="task-details">
           <h3>{task.title}</h3>
@@ -245,9 +270,9 @@ const TaskItem = ({ task, onToggle, onSchedule }) => {
         {task.completed ? (
           <>
             <span className="material-icons-outlined">check</span>
-            Schedule
+            {buttonText}
           </>
-        ) : 'Schedule'}
+        ) : buttonText}
       </Button>
     </TaskItemContainer>
   );
