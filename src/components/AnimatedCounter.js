@@ -1,50 +1,42 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 const CounterText = styled.span`
   font-size: inherit;
   font-weight: inherit;
   color: inherit;
+  filter: ${props => props.isAnimating ? 'blur(1px)' : 'none'};
+  transition: filter 0.2s;
 `;
 
-const AnimatedCounter = ({ end, duration = 2000 }) => {
-  const counterRef = useRef(null);
-  const startTime = useRef(null);
-  const frameRef = useRef(null);
+const AnimatedCounter = ({ end }) => {
+  const [count, setCount] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
-    const counter = counterRef.current;
-    const startValue = 0;
-    const endValue = end;
+    let startTimestamp;
+    const duration = 600; // 0.6 seconds
+    setIsAnimating(true);
 
-    const easeOutQuad = t => t * (2 - t);
-
-    const updateCounter = timestamp => {
-      if (!startTime.current) startTime.current = timestamp;
-      
-      const progress = Math.min((timestamp - startTime.current) / duration, 1);
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeOutQuad = t => t * (2 - t);
       const easedProgress = easeOutQuad(progress);
-      const currentValue = Math.floor(startValue + (endValue - startValue) * easedProgress);
-      
-      if (counter) {
-        counter.textContent = currentValue.toLocaleString();
-      }
+
+      setCount(Math.floor(easedProgress * end));
 
       if (progress < 1) {
-        frameRef.current = requestAnimationFrame(updateCounter);
+        window.requestAnimationFrame(step);
+      } else {
+        setIsAnimating(false);
       }
     };
 
-    frameRef.current = requestAnimationFrame(updateCounter);
+    window.requestAnimationFrame(step);
+  }, [end]);
 
-    return () => {
-      if (frameRef.current) {
-        cancelAnimationFrame(frameRef.current);
-      }
-    };
-  }, [end, duration]);
-
-  return <CounterText ref={counterRef}>0</CounterText>;
+  return <CounterText isAnimating={isAnimating}>{count.toLocaleString()}</CounterText>;
 };
 
 export default AnimatedCounter; 

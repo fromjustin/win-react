@@ -1,10 +1,11 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import Button from '../components/Button';
 import TopNav from '../components/TopNav';
 import Sidebar from '../components/Sidebar';
 import Modal from '../components/Modal';
 import Input from '../components/Input';
+import TaskItem from '../components/TaskItem';
 
 const AppContainer = styled.div`
   background: var(--bg-default);
@@ -131,45 +132,6 @@ const TasksList = styled.div`
   gap: 16px;
 `;
 
-const TaskItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-
-  .task-content {
-    display: flex;
-    align-items: normal;
-    gap: 8px;
-  }
-
-  .task-checkbox {
-    cursor: pointer;
-    color: ${props => props.completed ? 'var(--text-disabled)' : 'var(--primary-dark)'};
-
-    &:hover {
-      color: ${props => props.completed ? 'var(--text-disabled)' : 'var(--primary-dark)'};
-    }
-  }
-
-  .task-details {
-    h3 {
-      margin: 0 0 4px;
-      font-size: 16px;
-      color: ${props => props.completed ? 'var(--text-disabled)' : 'var(--text-primary)'};
-    }
-
-    p {
-      margin: 0;
-      color: ${props => props.completed ? 'var(--text-disabled)' : 'var(--text-secondary)'};
-      font-size: 14px;
-      line-height: 20px;
-    }
-  }
-`;
-
 const DashboardPage = () => {
   const [votersContacted, setVotersContacted] = React.useState(0);
   const [firstName, setFirstName] = React.useState('');
@@ -181,16 +143,25 @@ const DashboardPage = () => {
       id: 1,
       title: 'Schedule your persuasive text message',
       description: 'Build trust and persuade voters.',
-      completed: false
+      completed: false,
+      skipContactsModal: true
+    },
+    {
+      id: 2,
+      title: 'Call 25 voters',
+      description: 'Connect with voters in your district.',
+      completed: false,
+      skipContactsModal: false
     }
     // Add more tasks here
   ]);
-  const votersNeeded = 1547;
-  const progress = Math.min((votersContacted / votersNeeded) * 100, 100);
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+  const votesNeeded = 1547;
+  const progress = Math.min((votersContacted / votesNeeded) * 100, 100);
 
   const toggleTask = (taskId) => {
     const task = tasks.find(t => t.id === taskId);
-    if (!task.completed) {
+    if (!task.completed && !task.skipContactsModal) {
       setContactsModalOpen(true);
     }
     setTasks(tasks.map(task => 
@@ -206,14 +177,13 @@ const DashboardPage = () => {
   };
 
   React.useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     if (userData.initialContacts) {
       setVotersContacted(userData.initialContacts);
     }
     if (userData.firstName) {
       setFirstName(userData.firstName);
     }
-  }, []);
+  }, [userData.initialContacts, userData.firstName]);
 
   return (
     <AppContainer>
@@ -224,7 +194,7 @@ const DashboardPage = () => {
           <Header>
             <h1>{firstName ? `2 weeks away, ${firstName}!` : '2 weeks away!'}</h1>
             <h4 className="stats">
-              Your actions so far have earned you <strong>{votersContacted} voter contacts</strong> out of <strong>{votersNeeded} needed to win</strong>.
+              Your actions so far have earned you <strong>{votersContacted.toLocaleString()} voter contacts</strong> out of <strong>{votesNeeded.toLocaleString()} needed to win</strong>.
             </h4>
             <h4>You have <a href="#tasks-section" className="tasks-link">6 tasks</a> you need to complete.</h4>
           </Header>
@@ -244,9 +214,9 @@ const DashboardPage = () => {
               <div className="progress" />
             </ProgressBar>
             <ProgressStats>
-              <span>{votersContacted} voters contacted</span>
+              <span>{votersContacted.toLocaleString()} voters contacted</span>
               <span>
-                {votersNeeded} voter contacts needed
+                {votesNeeded.toLocaleString()} voter contacts needed
                 <span className="material-icons info-icon">info_outline</span>
               </span>
             </ProgressStats>
@@ -259,42 +229,12 @@ const DashboardPage = () => {
             </TasksHeader>
             <TasksList>
               {tasks.map(task => (
-                <TaskItem key={task.id} completed={task.completed}>
-                  <div className="task-content">
-                    <span 
-                      className="material-icons-outlined task-checkbox"
-                      onMouseEnter={(e) => {
-                        if (!task.completed) {
-                          e.target.textContent = 'check_circle';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!task.completed) {
-                          e.target.textContent = 'circle';
-                        }
-                      }}
-                      onClick={() => toggleTask(task.id)}
-                    >
-                      {task.completed ? 'task_alt' : 'circle'}
-                    </span>
-                    <div className="task-details">
-                      <h3>{task.title}</h3>
-                      <p>{task.description}</p>
-                    </div>
-                  </div>
-                  <Button 
-                    variant={task.completed ? 'success' : 'primary'}
-                    disabled={task.completed}
-                    onClick={() => !task.completed && setScheduleModalOpen(true)}
-                  >
-                    {task.completed ? (
-                      <>
-                        <span className="material-icons-outlined">check</span>
-                        Schedule
-                      </>
-                    ) : 'Schedule'}
-                  </Button>
-                </TaskItem>
+                <TaskItem
+                  key={task.id}
+                  task={task}
+                  onToggle={toggleTask}
+                  onSchedule={() => setScheduleModalOpen(true)}
+                />
               ))}
             </TasksList>
           </TasksSection>

@@ -17,7 +17,7 @@ const Step = styled.div`
   justify-content: center;
 `;
 
-const StepIndicator = ({ currentStep, totalSteps = 5 }) => {
+const StepIndicator = ({ currentStep, totalSteps = 3 }) => {
   return (
     <StepIndicators>
       {[...Array(totalSteps)].map((_, index) => (

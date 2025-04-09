@@ -19,13 +19,25 @@ const FormContainer = styled.div`
 `;
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 `;
 
 const LoadingContainer = styled.div`
   display: flex;
   align-items: baseline;
-  width: 340px;
+  text-align: left;
+  width: 100%;
   gap: 12px;
+`;
+
+const ResultContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 `;
 
 const LoadingText = styled.p`
@@ -68,12 +80,11 @@ const Dots = styled.div`
   }
 `;
 
-const Result = styled.div`
-`;
-
 const ResultNumber = styled.h1`
   animation: ${fadeIn} 0.5s ease-out;
   margin: 0 0 16px;
+  font-size: 80px;
+  line-height: 100px;
 `;
 
 const ResultText = styled.p`
@@ -82,10 +93,11 @@ const ResultText = styled.p`
   color: var(--text-primary);
 `;
 
-const CalculationAnimation = ({ votesNeeded, onComplete }) => {
+const CalculationAnimation = ({ votesNeeded, onComplete, onShowResult }) => {
   const [phase, setPhase] = useState(1);
   const [text, setText] = useState('');
   const [showResultText, setShowResultText] = useState(false);
+  const [showResultNumber, setShowResultNumber] = useState(false);
   const messages = [
     'Finding voter data for Chattanooga, TN',
     '7,030 voters found',
@@ -109,9 +121,13 @@ const CalculationAnimation = ({ votesNeeded, onComplete }) => {
             setTimeout(() => {
               setPhase(2);
               setTimeout(() => {
-                setShowResultText(true);
-                setTimeout(() => onComplete?.(), 1500);
-              }, 1000);
+                setShowResultNumber(true);
+                onShowResult?.(true);
+                setTimeout(() => {
+                  setShowResultText(true);
+                  setTimeout(() => onComplete?.(), 0);
+                }, 0);
+              }, 0);
             }, 1000);
             return;
           }
@@ -130,11 +146,12 @@ const CalculationAnimation = ({ votesNeeded, onComplete }) => {
     typeWriter();
 
     return () => clearTimeout(timer);
-  }, [onComplete]);
+  }, [onComplete, onShowResult]);
 
   if (phase === 1) {
     return (
-        <LoadingContainer>
+      <Container>
+        <LoadingContainer className="loading-container">
           <Dots>
             <span />
             <span />
@@ -142,19 +159,22 @@ const CalculationAnimation = ({ votesNeeded, onComplete }) => {
           </Dots>
           <LoadingText>{text}</LoadingText>
         </LoadingContainer>
+      </Container>
     );
   }
 
   return (
     <Container>
-      <Result>
-        <ResultNumber>
-          <AnimatedCounter end={votesNeeded} />
-        </ResultNumber>
+      <ResultContainer>
+        {showResultNumber && (
+          <ResultNumber>
+            <AnimatedCounter end={votesNeeded} />
+          </ResultNumber>
+        )}
         {showResultText && (
           <ResultText>Votes needed to win your election</ResultText>
         )}
-      </Result>
+      </ResultContainer>
     </Container>
   );
 };
