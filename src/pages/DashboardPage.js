@@ -25,7 +25,11 @@ const MainContent = styled.main`
   flex-direction: column;
   flex: 1;
   gap: 32px;
-  margin: 32px 24px 128px 24px;
+  margin: 32px 16px;
+
+  @media (min-width: 1024px) {
+    margin: 32px 24px 128px 24px;
+  }
 `;
 
 const Header = styled.header`
@@ -159,6 +163,14 @@ const SuccessIcon = styled.span`
   align-items: center;
 `;
 
+const SidebarWrapper = styled.div`
+  display: none;
+  
+  @media (min-width: 1024px) {
+    display: block;
+  }
+`;
+
 const DashboardPage = () => {
   const [votersContacted, setVotersContacted] = React.useState(0);
   const [firstName, setFirstName] = React.useState('');
@@ -247,7 +259,9 @@ const DashboardPage = () => {
     <AppContainer>
       <TopNav />
       <ContentWrapper>
-        <Sidebar />
+        <SidebarWrapper>
+          <Sidebar />
+        </SidebarWrapper>
         <MainContent>
           <Header>
             <h1>{firstName ? `2 weeks away, ${firstName}!` : '2 weeks away!'}</h1>

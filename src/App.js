@@ -7,6 +7,7 @@ import './App.css';
 import SignupPage from './pages/SignupPage';
 import SignupFlow from './pages/SignupFlow';
 import DashboardPage from './pages/DashboardPage';
+import OutreachPage from './pages/OutreachPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/signup/steps" element={<SignupFlow />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/outreach" element={<OutreachPage />} />
         </Routes>
       </div>
     </Router>
