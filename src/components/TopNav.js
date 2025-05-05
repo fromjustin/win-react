@@ -40,7 +40,7 @@ const MenuItem = styled.button`
 
 const Nav = styled.nav`
   background: var(--white);
-  padding: 16px;
+  padding: 8px 12px;
   border-bottom: 1px solid var(--border);
 `;
 
@@ -48,7 +48,6 @@ const NavContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 1200px;
   margin: 0 auto;
 `;
 
@@ -124,6 +123,7 @@ const NavButtons = styled.div`
 
 const AccountMenu = styled.div`
   display: none;
+  padding: 8px;
   
   @media (min-width: 1024px) {
     display: flex;
